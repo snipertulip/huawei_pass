@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="static/css/web/emigrated.css">
+	<script type="text/javascript" src="static/lib/jquery/jquery-2.2.4.js"></script>
+	<script type="text/javascript" src="static/lib/three/Queue.js"></script>
+	<script type="text/javascript" src="static/lib/createjs/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="static/lib/createjs/preloadjs-NEXT.combined.js"></script>
+	<script type="text/javascript">
+
+	$(function() {
+		var animation = function(uuid) {
+			console.log('animation');
+			$('.pass').animate({
+				opacity: '0.75'
+			}, "slow");
+			$('.pass').animate({
+				opacity: '1'
+			}, "slow");
+
+		}
+
+		//___________________________________________________________________________________________________________________________________________________________________________
+		var gResponse = [];
+
+		var gPollTime = 2000; //2000ms
+		var gSetInterval = null;
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Resources Queue:
+		var gCounts = 12;
+		var gResCache = new Array(gCounts);
+		$.each(gResCache, function(i, o) {
+			gResCache[i] = ['pass_' + i + '0.png', 'pass_' + i + '1.png'];
+		});
+
+		var gResponseCache = [];
+
+		var gPoll = function() {
+			//AJAX response data
+			//Simulated data:
+			//??????????????????????????????
+			gResponse = [{
+				"uuid": "78774717-1551-4770-811b-fef40de1c01d",
+				"score": 10,
+				"isSolved": false,
+				"cagetory": "Reverse Engineering",
+				"taskTitle": "题目2发发的撒范德萨范德萨",
+				"id": 546
+			}];
+
+			//If response a null array, then do nothing, return directly. 
+			//??????????????????????????????
+			if (gResponse === null) return;
+
+			//Compare the length, if gResponse's length equals gResponseCache's length, then display red:
+			if (gResponse.length !== gResponseCache.length) {
+				console.log('Let\'s flicker.')
+					//animation(uuid);
+				animation(0);
+				clearInterval(gSetInterval);
+				gSetInterval = setInterval(animation, 1000);
+				console.log(gResponse);
+				console.log(gResponseCache);
+				gResponseCache = gResponse;
+
+			}
+
+
+
+			/* else {
+				if (isAnimation) {
+					console.log('Is flicker.')
+				} else {
+					//???????????????????????
+					//Traversal and get uuid, pass into parameters and call animation.
+					console.log('Let\'s flicker.')
+						//animation(uuid);
+					isAnimation = true;
+				}
+			}*/
+
+			/*
+			if(gResponse.sort().toString() !== gResponseCache.sort().toString()){
+				console.log(':0');
+
+				gResponseCache = gResponse
+			}
+			*/
+
+			setTimeout(gPoll, gPollTime);
+		};
+
+		gPoll();
+
+
+
+
+		//console.log(_gResponse.length);
+
+		//console.log(gResCache);
+
+
+
+	});
+	</script>
+</head>
+
+<body>
+	<!-- <div class="pass"><img src="static/img/emigrated/pass_100.png"></div> -->
+	<canvas id="cas" width="1000" height="700"></canvas>
+</body>
+
+</html>

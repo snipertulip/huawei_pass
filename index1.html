@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="static/css/web/emigrated.css">
+	<script type="text/javascript" src="static/lib/jquery/jquery-2.2.4.js"></script>
+	<script type="text/javascript" src="static/lib/createjs/easeljs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="static/lib/createjs/preloadjs-NEXT.combined.js"></script>
+	<script type="text/javascript" src="static/lib/createjs/tweenjs-NEXT.combined.js"></script>
+	<script type="text/javascript">
+	$(function() {
+
+		//----------------------------------------------------------------------------------------------------
+		var gResponse0 = [{
+			"uuid": "78774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": false,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}];
+
+		var gResponse1 = [{
+			"uuid": "78774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": true,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}, {
+			"uuid": "58774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": false,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}];
+
+		var gResponse2 = [{
+			"uuid": "78774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": true,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}, {
+			"uuid": "58774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": true,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}, {
+			"uuid": "68774717-1551-4770-811b-fef40de1c01d",
+			"score": 10,
+			"isSolved": false,
+			"cagetory": "Reverse Engineering",
+			"taskTitle": "题目2发发的撒范德萨范德萨",
+			"id": 546
+		}];
+
+		var gResponseCount = -1;
+		//----------------------------------------------------------------------------------------------------
+
+
+
+		//----------------------------------------------------------------------------------------------------
+		var gResponseCache = [],
+			gResponse;
+
+
+		//----------------------------------------------------------------------------------------------------
+		//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		var gCanvas, gStage, gCanvasWidth = 1000,
+			gCanvasHeight = 700,
+			gIsReadyLoadData = false,
+			gIsReadyLoadResources = false;
+		var gLoadResourcesQueue;
+
+
+		var update = true;
+
+		var gPollTime = 2000; //2000ms
+		var gSetInterval = null;
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Resources Queue:
+		var gCounts = 12;
+		var gResCache = new Array(gCounts);
+		$.each(gResCache, function(i, o) {
+			//gResCache[i] = ['pass_' + i + '0.png', 'pass_' + i + '1.png'];
+			gResCache[i * 2] = {
+				id: i.toString() + '0',
+				src: 'static/img/emigrated/pass_' + i + '0.png'
+			};
+
+			gResCache[i * 2 + 1] = {
+				id: i.toString() + '1',
+				src: 'static/img/emigrated/pass_' + i + '1.png'
+			};
+		});
+
+		gResCache[gCounts * 2] = {
+			id: (gCounts * 2).toString(),
+			src: 'static/img/emigrated/star.png'
+		};
+
+		//----------------------------------------------------------------------------------------------------
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Class: constellation
+		(function() {
+			var CONSTELLATION = CONSTELLATION || function(pSn, pResponseDataJSON) {
+				this.order = CONSTELLATION.COUNTS++;
+				this.sn = '';
+				this.cacheData = null;
+				//Cache red and blue constellation:
+				this.bitmap = new Array(2);
+				this.isSolved = false;
+				//Subscript of this.bitmap:
+				this.zoeticSubscript = 0;
+
+				this.onClickUnsolved = function() {
+					examAnswer(this.sn);
+					//console.log('red is clicked!');
+
+				}.bind(this);
+
+				this.onRolloverUnsolved = function(evt) {
+					this.scaleX = this.scaleY = this.scale = 1 * 1.02;
+				};
+
+				this.onRolloutUnsolved = function(evt) {
+					this.scaleX = this.scaleY = this.scale = 1;
+				};
+
+				this.onClickSolved = function() {
+					examShow(this.sn)
+						//console.log('blue is clicked!');
+				}.bind(this);
+
+				this.onRolloverSolved = function(evt) {
+					this.scaleX = this.scaleY = this.scale = 1 * 1.02;
+				};
+
+				this.onRolloutSolved = function(evt) {
+					this.scaleX = this.scaleY = this.scale = 1;
+				};
+
+				CONSTELLATION.MAP.set(pSn, pResponseDataJSON);
+
+			};
+
+			CONSTELLATION.COUNTS = 0;
+
+			CONSTELLATION.CURRENTPASS = 0;
+
+			CONSTELLATION.MAP = new Map();
+
+			CONSTELLATION.Queue = [];
+
+			CONSTELLATION.GetBitmapBySn = function(sn) {
+				return (CONSTELLATION.MAP.get(sn));
+			};
+
+			this.CONSTELLATION = CONSTELLATION;
+		}());
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Class: Artificial Intelligence
+		(function() {
+			var AI = AI || function() {
+
+				//+++++++++++++++++++++++++++++++++++++++++++++++++
+				//initialize canvas:
+				this.iniCanvas = function() {
+					// create stage and point it to the canvas:
+					gCanvas = document.createElement("canvas");
+					gCanvas.setAttribute('width', gCanvasWidth);
+					gCanvas.setAttribute('height', gCanvasHeight);
+					document.body.appendChild(gCanvas);
+					//canvas = document.getElementById("testCanvas");
+					gStage = new createjs.Stage(gCanvas);
+					// enable touch interactions if supported on the current device:
+					createjs.Touch.enable(gStage);
+					// enabled mouse over / out events
+					gStage.enableMouseOver(10);
+					gStage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
+				}
+
+				//+++++++++++++++++++++++++++++++++++++++++++++++++
+				//Loading resources:
+				this.loadResources = function() {
+					gLoadResourcesQueue = new createjs.LoadQueue();
+					//queue.installPlugin(createjs.Sound);
+					gLoadResourcesQueue.loadManifest(gResCache);
+
+					gLoadResourcesQueue.on("complete", this.handleImageLoad);
+
+					$.each(gResCache, function(i, o) {
+						//console.log(o);
+					})
+				}
+				this.handleImageLoad = function(e) {
+					gIsReadyLoadResources = true;
+
+					var image = e.target;
+					var bitmap;
+					var container = new createjs.Container();
+					gStage.addChild(container);
+
+					bitmap = new createjs.Bitmap(image.getResult(gResCache[gCounts * 2].id));
+					container.addChild(bitmap);
+					//Remove the background:
+					image.remove(gCounts * 2);
+					gResCache.pop();
+
+					$.each(gResCache, function(i, o) {
+						if (i % 2 == 0) {
+							var _constellation = new CONSTELLATION();
+
+							bitmap = new createjs.Bitmap(image.getResult(gResCache[i].id));
+							bitmap.visible = false;
+							container.addChild(bitmap);
+							_constellation.bitmap[0] = bitmap;
+							_constellation.bitmap[0].on("mousedown", _constellation.onClickUnsolved.bind(_constellation.bitmap[0]));
+							_constellation.bitmap[0].on("rollover", _constellation.onRolloverUnsolved.bind(_constellation.bitmap[0]));
+							_constellation.bitmap[0].on("rollout", _constellation.onRolloutUnsolved.bind(_constellation.bitmap[0]));
+							_constellation.bitmap[0].cursor = "pointer";
+
+							bitmap = new createjs.Bitmap(image.getResult(gResCache[i + 1].id));
+							bitmap.visible = false;
+							container.addChild(bitmap);
+							_constellation.bitmap[1] = bitmap;
+							_constellation.bitmap[1].on("mousedown", _constellation.onClickSolved.bind(_constellation.bitmap[1]));
+							_constellation.bitmap[1].on("rollover", _constellation.onRolloverSolved.bind(_constellation.bitmap[1]));
+							_constellation.bitmap[1].on("rollout", _constellation.onRolloutSolved.bind(_constellation.bitmap[1]));
+							_constellation.bitmap[1].cursor = "pointer";
+
+							CONSTELLATION.Queue.push(_constellation);
+						}
+					});
+
+					//bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1 //Math.random() * 0.4 + 0.6;
+					//bitmap.name = "bmp_";
+
+					createjs.Ticker.timingMode = createjs.Ticker.RAF;
+					createjs.Ticker.addEventListener("tick", this.tick);
+				}.bind(this);
+				this.tick = function(event) {
+					// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+					if (update) {
+						update = false; // only update once
+						gStage.update(event);
+					}
+				}
+				this.stop = function() {
+					createjs.Ticker.removeEventListener("tick", this.tick);
+				};
+
+				this.render = function() {
+					requestAnimationFrame(this.render);
+					console.log('render');
+				}.bind(this);
+
+
+				//+++++++++++++++++++++++++++++++++++++++++++++++++
+				//poll:
+				this.poll = function() {
+					//ajax success:
+					gIsReadyLoadData = true;
+
+
+					++gResponseCount;
+					if (gResponseCount > 2) gResponseCount = 2;
+					gResponse = eval('gResponse' + gResponseCount);
+					//The topic marked as unsolved should be the last.
+					//Reverse gResponse:
+					try {
+						if (!gResponse[0].isSolved) gResponse.reverse();
+					} catch (e) {
+						throw (e);
+					}
+
+					setTimeout(this.poll, 5000);
+
+				}.bind(this);
+
+				//+++++++++++++++++++++++++++++++++++++++++++++++++
+				//Artificial Intelligence:
+				this.ai = function() {
+
+					if (gResponse.length > gResponseCache.length) {
+						CONSTELLATION.CURRENTPASS = gResponse.length - 1;
+
+						/*$.each(gResponse, function(i, o) {
+							CONSTELLATION.Queue[i].cacheData = o;
+							CONSTELLATION.Queue[i].sn = o.uuid;
+							CONSTELLATION.Queue[i].isSolved = o.isSolved;
+							CONSTELLATION.Queue[i].zoeticSubscript = o.isSolved ? 1 : 0;
+							CONSTELLATION.Queue[i].bitmap[CONSTELLATION.Queue[i].zoeticSubscript].visible = true;
+						});*/
+
+						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].cacheData = gResponse[CONSTELLATION.CURRENTPASS];
+						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].sn = gResponse[CONSTELLATION.CURRENTPASS].uuid;
+						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].isSolved = gResponse[CONSTELLATION.CURRENTPASS].isSolved;
+						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].zoeticSubscript = gResponse[CONSTELLATION.CURRENTPASS].isSolved ? 1 : 0;
+						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].bitmap[CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].zoeticSubscript].visible = true;
+						if (gResponseCache.length > 0) {}
+
+						if (gResponseCache.length == CONSTELLATION.CURRENTPASS) {}
+
+						var __targetBitmap;
+						//It's not the first constellation:
+						if (gResponseCache.length > 0) {
+							__targetBitmap = CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS - 1].bitmap[0];
+							//Remove Tweens
+							createjs.Tween.removeTweens(__targetBitmap);
+							__targetBitmap.visible = false;
+							CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS - 1].bitmap[1].visible = true
+						}
+
+						//Flicker red now:
+						__targetBitmap = CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].bitmap[0];
+						__targetBitmap.alpha = .5;
+
+						var tween = createjs.Tween.get(__targetBitmap, {
+								loop: true
+							})
+							.to({
+								alpha: 1
+							}, 500).wait(500).to({
+								alpha: .5
+							}, 500).addEventListener("change", function() {
+								update = true;
+							});
+
+						gResponseCache = gResponse;
+						//console.log('ai');
+
+					} else if (gResponse.length == gResponseCache.length && gResponse.length > 0) {
+						//Mission all over
+						if (gResponse[gResponse.length - 1].isSolved) {
+							//CONSTELLATION.Queue's lastest should be change to blue at here:
+							console.log('ai have passed');
+						} else {
+							//
+							console.log('ai but data don\'t changed');
+						}
+					}
+				};
+
+				this.loop = function() {
+					if (gIsReadyLoadData && gIsReadyLoadResources) {
+						this.ai();
+						gIsReadyLoadData = false;
+					}
+					setTimeout(this.loop, 200);
+				}.bind(this);
+
+				this.ini = function() {
+					this.iniCanvas();
+					this.loadResources();
+					this.poll();
+					this.loop();
+				}
+
+				this.ini();
+
+			};
+
+			this.AI = AI;
+		}());
+
+		//----------------------------------------------------------------------------------------------------
+
+		//Test data:
+		//gIsReadyLoadData = true;
+		var ai1 = new AI();
+		//----------------------------------------------------------------------------------------------------
+
+
+	}.bind(this));
+
+	$(function() {
+		//show exam:
+		var examShow = function(uuid) {
+			console.log(uuid);
+		}
+
+		//answer exam:
+		var examAnswer = function(uuid) {
+			console.log(uuid);
+		}
+
+		this.examShow = examShow;
+		this.examAnswer = examAnswer;
+
+	}.bind(this));
+	</script>
+</head>
+
+<body>
+</body>
+
+</html>
