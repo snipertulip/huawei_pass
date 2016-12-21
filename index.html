@@ -89,7 +89,7 @@
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Resources Queue:
-		var gCounts = 3;
+		var gCounts = 12;
 		var gResCache = new Array(gCounts);
 		$.each(gResCache, function(i, o) {
 			//gResCache[i] = ['pass_' + i + '0.png', 'pass_' + i + '1.png'];
@@ -297,13 +297,13 @@
 					if (gResponse.length > gResponseCache.length) {
 						CONSTELLATION.CURRENTPASS = gResponse.length - 1;
 
-						/*$.each(gResponse, function(i, o) {
+						$.each(gResponse, function(i, o) {
 							CONSTELLATION.Queue[i].cacheData = o;
 							CONSTELLATION.Queue[i].sn = o.uuid;
 							CONSTELLATION.Queue[i].isSolved = o.isSolved;
 							CONSTELLATION.Queue[i].zoeticSubscript = o.isSolved ? 1 : 0;
 							CONSTELLATION.Queue[i].bitmap[CONSTELLATION.Queue[i].zoeticSubscript].visible = true;
-						});*/
+						});
 
 						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].cacheData = gResponse[CONSTELLATION.CURRENTPASS];
 						CONSTELLATION.Queue[CONSTELLATION.CURRENTPASS].sn = gResponse[CONSTELLATION.CURRENTPASS].uuid;
